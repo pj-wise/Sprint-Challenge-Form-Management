@@ -1,40 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Form, Field, withFormik } from "formik";
-import * as Yup from "yup";
+import axios from "axios";
+import * as yup from "yup";
 
-const RegForm = ({ errors, touched }) => {
+const RegForm = ({ values, errors, touched, status, setData }) => {
+  useEffect(() => {
+    if (status) {
+      axios
+        .get("http://localhost:5000/api/restricted/data")
+        .then(res => {
+          console.log("GET Success", res);
+          setData(res.data);
+        })
+        .catch(err => console.log("GET Fail", err));
+    }
+  }, [status]);
+
   return (
-    <div className="form">
+    <Form>
       <h1>Registration</h1>
-      <Form>
-        <Field type="text" name="username" placeholder="Username" />
-        {touched.username && errors.username && (
-          <p className="error">Please enter your username</p>
-        )}
-        <Field type="text" name="password" placeholder="Password" />
-        {touched.password && errors.password && (
-          <p className="error">Please enter your password</p>
-        )}
-        <button type="submit">Submit</button>
-      </Form>
-    </div>
+      <Field type="text" name="username" placeholder="Your name" />
+      {touched.username && errors.username && <p>{errors.username}</p>}
+
+      <Field type="password" name="password" placeholder="Password" />
+      {touched.password && errors.password && <p>{errors.password}</p>}
+
+      <button type="submit">Submit</button>
+    </Form>
   );
 };
 
 const FormikRegForm = withFormik({
-  mapPropsToValues: ({ username, password }) => {
+  mapPropsToValues({ username, password }) {
     return {
       username: username || "",
       password: password || ""
     };
   },
 
-  validationSchema: Yup.object().shape({
-    username: Yup.string().required("Username is required!"),
-    password: Yup.string()
-      .min(6, "Password must be at least 6 characters long")
-      .required("Please enter your password")
-  })
+  validationSchema: yup.object().shape({
+    username: yup.string().required("*Name is required"),
+    password: yup
+      .string()
+      .min(6, "*Password must be 6 characters or longer")
+      .required("*Password is required")
+  }),
+
+  handleSubmit(values, { resetForm, setErrors, setSubmitting, setStatus }) {
+    axios
+      .post("http://localhost:5000/api/register", values)
+      .then(res => {
+        console.log("POST Success", res);
+        setStatus(res.data);
+        resetForm();
+        setSubmitting(false);
+      })
+      .catch(err => {
+        console.log("POST Fail", err);
+        setSubmitting(false);
+      });
+  }
 })(RegForm);
 
 export default FormikRegForm;
