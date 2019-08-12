@@ -1,0 +1,23 @@
+.App {
+  text-align: center;
+}
+
+Form {
+  display       : flex;
+  width         : 30%;
+  flex-direction: column;
+  margin        : 0 auto;
+}
+
+Form input {
+  margin: 1em 0 0;
+  border: 2px solid lightgray;
+}
+
+Form button {
+  margin          : 1em auto 0;
+  width           : 30%;
+  border          : 1px solid grey;
+  border-radius   : 10px;
+  background-color: white;
+}
